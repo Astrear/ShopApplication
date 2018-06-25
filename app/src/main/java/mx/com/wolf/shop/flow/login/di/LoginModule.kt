@@ -2,7 +2,7 @@ package mx.com.wolf.shop.flow.login.di
 
 import dagger.Module
 import dagger.Provides
-import mx.com.wolf.shop.data.source.ItemRepository
+import mx.com.wolf.shop.data.source.LoginApi
 import mx.com.wolf.shop.flow.login.LoginPresenter
 import mx.com.wolf.shop.mvp.di.ActivityScope
 
@@ -14,5 +14,5 @@ import mx.com.wolf.shop.mvp.di.ActivityScope
 class LoginModule {
     @Provides
     @ActivityScope
-    internal fun provideLoginPresenter(itemRepository: ItemRepository) = LoginPresenter(itemRepository)
+    internal fun provideLoginPresenter(api: LoginApi) = LoginPresenter(api)
 }

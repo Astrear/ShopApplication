@@ -1,18 +1,27 @@
 package mx.com.wolf.shop.flow.login
 
-import android.support.v7.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import com.dd.processbutton.iml.ActionProcessButton
 import kotlinx.android.synthetic.main.activity_login.*
 import mx.com.wolf.shop.R
 import mx.com.wolf.shop.ShopApplication
+import mx.com.wolf.shop.flow.home.HomeActivity
 import mx.com.wolf.shop.flow.login.di.DaggerLoginComponent
 import mx.com.wolf.shop.flow.login.di.LoginModule
 import javax.inject.Inject
 
 class LoginActivity : AppCompatActivity(), LoginContract.View {
 
+    companion object {
+        val TAG = LoginActivity::class.simpleName
+    }
+
     @Inject lateinit var  presenter: LoginPresenter
+
+    lateinit var loginButton: ActionProcessButton
 
     fun inject() = DaggerLoginComponent
             .builder()
@@ -21,13 +30,15 @@ class LoginActivity : AppCompatActivity(), LoginContract.View {
             .build()
             .inject(this)
 
-    override fun setLoadingIndicator(status: Boolean) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
+
+    fun showHome() {
+        val intent = Intent(applicationContext, HomeActivity::class.java)
+        startActivity(intent)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,12 +47,18 @@ class LoginActivity : AppCompatActivity(), LoginContract.View {
 
         inject()
         presenter.attachView(this)
-        button_login.setOnClickListener {
+
+        loginButton = button_login.apply { setMode(ActionProcessButton.Mode.ENDLESS) }
+        loginButton.setOnClickListener {
+
             val userName = input_username.editText!!.text.toString()
             val password = input_password.editText!!.text.toString()
 
-            if(password.isNotBlank() && userName.isNotBlank())
+            if(password.isNotBlank() && userName.isNotBlank()) {
                 presenter.login(userName, password)
+                loginButton.isEnabled = false
+                loginButton.progress = 1
+            }
         }
     }
 }

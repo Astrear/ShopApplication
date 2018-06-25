@@ -17,7 +17,7 @@ data class Item(
         var image: String,
 
         @ColumnInfo(name = "description")
-        var description: String?
+        var description: String
 ) {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")

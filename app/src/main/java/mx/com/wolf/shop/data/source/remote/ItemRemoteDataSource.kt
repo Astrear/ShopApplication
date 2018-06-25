@@ -2,14 +2,13 @@ package mx.com.wolf.shop.data.source.remote
 
 import android.util.Log
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import mx.com.wolf.shop.data.Item
-import mx.com.wolf.shop.data.Login
+import mx.com.wolf.shop.data.ItemRequest
 import mx.com.wolf.shop.data.source.ItemDataSource
-import mx.com.wolf.shop.data.source.JwtDataSource
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,47 +18,32 @@ import javax.inject.Singleton
  */
 @Singleton
 class ItemRemoteDataSource
-@Inject constructor(
-        var shopApi: ShopApi
-): JwtDataSource {
+@Inject constructor(var shopApi: ShopApi): ItemDataSource {
 
-    override fun getJwtToken(
-            username: String,
-            password: String,
-            callback: JwtDataSource.GetJwtTokenCallback
-    ) {
-        shopApi.getJwtToken(Login(username, password))
+
+    fun getItems(): Flowable<List<Item>> {
+        return shopApi.getItems()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .toFlowable()
+    }
+
+    override fun getItem(itemId: Int, callback: ItemDataSource.GetItemCallback) {
+        shopApi.getItem(itemId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                        onSuccess = {callback.onSuccess(it)},
-                        onError = {callback.onError(it.message!!)}
+                        onSuccess = {callback.onSuccess(it)}
                 )
     }
 
-    fun listItems(callback: ItemDataSource.ListItemsCallback): Disposable {
-        return shopApi.listItems()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                        onSuccess = {callback.onSuccess(it)},
-                        onError =  {callback.onDataUnavailable()}
-                )
+    override fun addItems(items: List<Item>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    fun getItem(itemId: Int, callback: ItemDataSource.GetItemCallback): Disposable {
-        return shopApi.getItem(itemId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                        onSuccess = {callback.onSuccess(it)},
-                        onError = {callback.onDataUnavailable()}
-                )
-    }
-
-    fun addItem(item: Item)  {
+    override fun addItem(item: Item)  {
         Completable.fromAction {
-            shopApi.addItem(item)
+            shopApi.addItem(ItemRequest(item.name, item.image, item.description))
         }.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
@@ -68,7 +52,18 @@ class ItemRemoteDataSource
                 )
     }
 
-    fun deleteItem(itemId: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun deleteItem(itemId: Int) {
+        Completable.fromAction {
+            shopApi.deleteItem(itemId)
+        }.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                        onComplete = {Log.i("test", "complete")},
+                        onError = {Log.e("test",it.message)}
+                )
+    }
+
+    interface LoadItemsCallback {
+        fun onSuccess(items:List<Item>)
     }
 }

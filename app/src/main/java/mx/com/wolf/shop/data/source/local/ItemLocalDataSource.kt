@@ -1,5 +1,10 @@
 package mx.com.wolf.shop.data.source.local
 
+import android.arch.lifecycle.LiveData
+import io.reactivex.Scheduler
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import mx.com.wolf.shop.data.Item
 import mx.com.wolf.shop.data.source.ItemDataSource
 import mx.com.wolf.shop.util.ApplicationExecutors
@@ -17,24 +22,27 @@ class ItemLocalDataSource
         var itemDAO: ItemDAO
 ): ItemDataSource {
 
-    override fun listItems(callback: ItemDataSource.ListItemsCallback) {
-        Runnable {
-            val items = itemDAO.getAll()
-            executors.mainThread.execute {
-                if(items.isEmpty()) callback.onDataUnavailable()
-                else callback.onSuccess(items)
-            }
-        }.let { executors.diskIO.execute(it) }
+
+    fun getItems(): Single<LiveData<List<Item>>> {
+        return Single.fromCallable({ itemDAO.getItems() })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     override fun getItem(itemId: Int, callback: ItemDataSource.GetItemCallback) {
         Runnable {
             val item = itemDAO.get(itemId)
             executors.mainThread.execute {
-                if(item == null) callback.onDataUnavailable()
+                if(item == null) callback.onError()
                 else callback.onSuccess(item)
             }
         }.let { executors.diskIO.execute(it) }
+    }
+
+    override fun addItems(items: List<Item>) {
+        Runnable {
+            itemDAO.insertItems(*items.toTypedArray())
+        }.let {executors.diskIO.execute(it)}
     }
 
     override fun addItem(item: Item) {
@@ -51,4 +59,8 @@ class ItemLocalDataSource
         }.let { executors.diskIO.execute(it) }
     }
 
+    interface LoadItemsCallback {
+        fun onSuccess(items: LiveData<List<Item>>)
+        fun onError(message: String = "", data: Boolean = false)
+    }
 }

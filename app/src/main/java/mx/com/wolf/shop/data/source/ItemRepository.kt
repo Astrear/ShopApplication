@@ -1,5 +1,10 @@
 package mx.com.wolf.shop.data.source
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
+import android.arch.lifecycle.ViewModel
+import android.util.Log
 import mx.com.wolf.shop.data.Item
 import mx.com.wolf.shop.data.di.Local
 import mx.com.wolf.shop.data.di.Remote
@@ -17,33 +22,51 @@ class ItemRepository
 @Inject constructor(
         @Local var localDataSource: ItemLocalDataSource,
         @Remote var remoteDataSource: ItemRemoteDataSource
-): ItemDataSource, JwtDataSource {
+): ViewModel() {
 
-    var cachedElements: MutableMap<Int, Item>? = null
-    var cacheIsDirty: Boolean = false
+    var items: MutableLiveData<List<Item>>? = null
+    var cacheIsDirty: Boolean = true
 
+    fun getItems(): LiveData<List<Item>> {
+        Log.i("Repository", "on getfunction")
+        if(items != null && !cacheIsDirty)
+            return items!!
 
-    override fun getJwtToken(
-            username: String,
-            password: String,
-            callback: JwtDataSource.GetJwtTokenCallback
-    ) {
-        remoteDataSource.getJwtToken(username, password, callback)
+        if(items == null)
+            items = MutableLiveData()
+
+        if(cacheIsDirty) {
+            getItemsFromRemoteSOurce()
+        } else {
+            localDataSource.getItems()
+                    .subscribe { items ->
+                        if(items.value != null && items.value!!.isEmpty())
+                            this.items!!.value = items.value
+                        else getItemsFromRemoteSOurce()
+                    }
+        }
+        return items!!
     }
 
-    override fun listItems(callback: ItemDataSource.ListItemsCallback) {
-        // TODO
+    private fun getItemsFromRemoteSOurce() {
+        remoteDataSource.getItems()
+                .first(mutableListOf())
+                .subscribe { items ->
+                    for(item in items)
+                        localDataSource.addItem(item)
+                    this.items!!.value = items
+                }
     }
 
-    override fun getItem(itemId: Int, callback: ItemDataSource.GetItemCallback) {
+    fun getItem(itemId: Int, callback: ItemDataSource.GetItemCallback) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun addItem(item: Item) {
+    fun addItem(item: Item) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun deleteItem(itemId: Int) {
+    fun deleteItem(itemId: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

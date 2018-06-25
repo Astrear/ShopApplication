@@ -1,7 +1,6 @@
 package mx.com.wolf.shop.data.source
 
 import mx.com.wolf.shop.data.Item
-import mx.com.wolf.shop.data.JwtToken
 
 /**
  * Created by Jose Barrera on 23/06/2018.
@@ -9,18 +8,18 @@ import mx.com.wolf.shop.data.JwtToken
  */
 interface ItemDataSource {
 
-    interface ListItemsCallback {
+    interface LoadItemsCallback {
         fun onSuccess(items: List<Item>)
-        fun onDataUnavailable()
+        fun onError()
     }
 
     interface GetItemCallback {
         fun onSuccess(item: Item)
-        fun onDataUnavailable()
+        fun onError()
     }
 
-    fun listItems(callback: ListItemsCallback)
     fun getItem(itemId: Int, callback: GetItemCallback)
+    fun addItems(items: List<Item>)
     fun addItem(item: Item)
     fun deleteItem(itemId: Int)
 }

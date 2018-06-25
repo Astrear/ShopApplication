@@ -13,7 +13,6 @@ import javax.inject.Singleton
 @Singleton
 class ApplicationExecutors(
         val diskIO: Executor,
-        val networkIO: Executor,
         val mainThread: Executor
 ) {
     companion object {

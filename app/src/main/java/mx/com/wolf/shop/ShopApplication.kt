@@ -21,7 +21,6 @@ class ShopApplication: Application() {
         DaggerApplicationComponent
                 .builder()
                 .applicationModule(ApplicationModule(this))
-                .itemRepositoryModule(ItemRepositoryModule())
                 .netModule(NetModule(BASE_URL))
                 .build()
     }

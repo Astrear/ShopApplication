@@ -9,7 +9,6 @@ import mx.com.wolf.shop.mvp.BaseView
  */
 object LoginContract {
     interface View: BaseView {
-        fun setLoadingIndicator(status: Boolean)
         fun showError(message: String)
     }
 

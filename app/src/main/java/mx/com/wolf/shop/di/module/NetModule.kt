@@ -6,8 +6,9 @@ import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import io.reactivex.schedulers.Schedulers
-import mx.com.wolf.shop.BuildConfig
+import mx.com.wolf.shop.extensions.getSessionToken
 import okhttp3.Cache
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -52,12 +53,26 @@ class NetModule(private val baseURL: String) {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(cache: Cache, loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor, sessionToken: String): OkHttpClient {
         return OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
-                .cache(cache)
+                .addInterceptor({ chain ->
+                    val request = chain.request()
+                    if(request.url().encodedPath().toLowerCase() == "/api-token-auth/")
+                        return@addInterceptor chain.proceed(request)
+
+                    return@addInterceptor chain.proceed(
+                            request.newBuilder()
+                                    .addHeader("Authorization", "JWT $sessionToken")
+                                    .build()
+                    )
+                })
                 .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideSessionToken(context: Context): String = context.getSessionToken()
 
     @Provides
     @Singleton

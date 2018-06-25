@@ -6,6 +6,7 @@ import dagger.Module
 import dagger.Provides
 import mx.com.wolf.shop.data.di.Local
 import mx.com.wolf.shop.data.di.Remote
+import mx.com.wolf.shop.data.source.LoginApi
 import mx.com.wolf.shop.data.source.local.ItemDAO
 import mx.com.wolf.shop.data.source.local.ItemLocalDataSource
 import mx.com.wolf.shop.data.source.local.ShopDatabase
@@ -47,8 +48,7 @@ class ItemRepositoryModule {
     @Singleton
     fun providesAppExecutors(): ApplicationExecutors = ApplicationExecutors(
             ApplicationExecutors.DiskIOThreadExecutor(),
-            Executors.newFixedThreadPool(ApplicationExecutors.TREAD_LIMIT),
-            ApplicationExecutors.MainThreadExecutor()
+            Executors.newFixedThreadPool(ApplicationExecutors.TREAD_LIMIT)
     )
 
     @Provides
@@ -57,4 +57,7 @@ class ItemRepositoryModule {
         return retrofit.create(ShopApi::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideLoginApi(api: ShopApi): LoginApi = LoginApi(api)
 }

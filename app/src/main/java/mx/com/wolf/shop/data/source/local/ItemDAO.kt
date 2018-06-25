@@ -1,5 +1,6 @@
 package mx.com.wolf.shop.data.source.local
 
+import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Insert
 import android.arch.persistence.room.OnConflictStrategy
@@ -14,10 +15,13 @@ import mx.com.wolf.shop.data.Item
 interface ItemDAO {
 
     @Query("SELECT * FROM item")
-    fun getAll(): List<Item>
+    fun getItems(): LiveData<List<Item>>
 
     @Query("SELECT * FROM item WHERE id = :itemId")
     fun get(itemId: Int): Item?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertItems(vararg items: Item)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(item: Item)
