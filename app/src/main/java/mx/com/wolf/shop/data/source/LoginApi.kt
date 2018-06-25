@@ -25,7 +25,14 @@ class LoginApi @Inject constructor(var api: ShopApi) {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(
-                        onSuccess = {callback.onSuccess(it)},
+                        onSuccess = {response ->
+                            if(response.isSuccessful)
+                                callback.onSuccess(response.body()!!)
+                            else when(response.code()) {
+                                400 -> callback.onError("Incorrect Username/Password")
+                                else -> callback.onError("server Error")
+                            }
+                        },
                         onError = {callback.onError(it.message!!)}
                 )
     }

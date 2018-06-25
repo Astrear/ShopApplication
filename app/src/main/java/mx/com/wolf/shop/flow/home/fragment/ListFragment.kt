@@ -47,13 +47,9 @@ class ListFragment: Fragment() {
             adapter = ItemAdapter(list)
         }
 
-        val model = ViewModelProviders.of((activity as HomeActivity), (activity as HomeActivity).viewModelFactory)[ItemRepository::class.java]
-
-        model.getItems().observe(activity as HomeActivity, Observer {
+        (activity as HomeActivity).itemRepository.getItems().observe(activity as HomeActivity, Observer {
 
             if(it != null) {
-                for(item in it)
-                    Log.i(TAG, "${item.name}")
                 list.clear()
                 list.addAll(it)
             }

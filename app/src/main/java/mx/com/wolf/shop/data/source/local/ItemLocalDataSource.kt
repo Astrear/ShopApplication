@@ -1,6 +1,9 @@
 package mx.com.wolf.shop.data.source.local
 
 import android.arch.lifecycle.LiveData
+import android.util.Log
+import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -20,7 +23,7 @@ class ItemLocalDataSource
 @Inject constructor(
         var executors: ApplicationExecutors,
         var itemDAO: ItemDAO
-): ItemDataSource {
+) {
 
 
     fun getItems(): Single<LiveData<List<Item>>> {
@@ -29,29 +32,20 @@ class ItemLocalDataSource
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    override fun getItem(itemId: Int, callback: ItemDataSource.GetItemCallback) {
-        Runnable {
-            val item = itemDAO.get(itemId)
-            executors.mainThread.execute {
-                if(item == null) callback.onError()
-                else callback.onSuccess(item)
-            }
-        }.let { executors.diskIO.execute(it) }
-    }
+    fun getItem(itemId: Int): Flowable<Item> =
+            itemDAO.get(itemId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .toFlowable()
 
-    override fun addItems(items: List<Item>) {
-        Runnable {
-            itemDAO.insertItems(*items.toTypedArray())
-        }.let {executors.diskIO.execute(it)}
-    }
+    fun addItem(item: Item): Flowable<Long> =
+            Completable.fromAction {
+                itemDAO.insert(item)
+            }.subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .toFlowable()
 
-    override fun addItem(item: Item) {
-        Runnable {
-            itemDAO.insert(item)
-        }.let {executors.diskIO.execute(it)}
-    }
-
-    override fun deleteItem(itemId: Int) {
+    fun deleteItem(itemId: Int) {
         Runnable {
             executors.mainThread.execute {
                 itemDAO.delete(itemId)

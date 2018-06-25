@@ -1,5 +1,6 @@
 package mx.com.wolf.shop.data
 
+import android.databinding.DataBindingUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import mx.com.wolf.shop.R
 import android.graphics.drawable.Drawable
 import android.util.Log
 import com.squareup.picasso.Picasso
+import mx.com.wolf.shop.databinding.LayoutItemBinding
 import java.io.InputStream
 import java.net.URL
 
@@ -22,38 +24,31 @@ import java.net.URL
 class ItemAdapter(private var itemList: MutableList<Item>)
     : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
 
-    class ItemViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        val itemName: TextView = view.item_name
-        val itemImage: ImageView = view.item_image
-        val itemDescription: TextView = view.item_description
-    }
+    private var layoutInflater: LayoutInflater? = null
+
+    class ItemViewHolder(val layoutItemBinding: LayoutItemBinding): RecyclerView.ViewHolder(layoutItemBinding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
+        if (layoutInflater == null)
+            layoutInflater = LayoutInflater.from(parent.context)
+
+        val binding: LayoutItemBinding = DataBindingUtil.inflate(layoutInflater!!, R.layout.layout_item, parent, false)
+
         val itemView = LayoutInflater.from(parent.context)
                 .inflate(R.layout.layout_item, parent, false)
 
-        return ItemViewHolder(itemView)
+        return ItemViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val item = itemList[position]
-        holder.itemName.text = item.name
-        holder.itemDescription.text = item.description
-        Picasso.get().load(item.image).into(holder.itemImage)
+        holder.layoutItemBinding.item = item
+        holder.layoutItemBinding.itemImage.setOnClickListener {
+            Log.i("image", "clicked")
+        }
     }
 
     override fun getItemCount(): Int {
         return itemList.size
-    }
-
-    fun LoadImageFromWebOperations(url: String): Drawable? {
-        return try {
-            val inputStream = URL(url).content as InputStream
-            Drawable.createFromStream(inputStream, "src name")
-        } catch (e: Exception) {
-            Log.i("Adapter", e.message)
-            null
-        }
-
     }
 }

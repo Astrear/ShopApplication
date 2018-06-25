@@ -20,6 +20,6 @@ interface ItemDataSource {
 
     fun getItem(itemId: Int, callback: GetItemCallback)
     fun addItems(items: List<Item>)
-    fun addItem(item: Item)
+    //fun addItem(item: Item)
     fun deleteItem(itemId: Int)
 }

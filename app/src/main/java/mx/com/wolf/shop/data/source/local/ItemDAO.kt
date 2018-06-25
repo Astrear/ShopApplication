@@ -5,6 +5,7 @@ import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Insert
 import android.arch.persistence.room.OnConflictStrategy
 import android.arch.persistence.room.Query
+import io.reactivex.Maybe
 import mx.com.wolf.shop.data.Item
 
 /**
@@ -18,13 +19,13 @@ interface ItemDAO {
     fun getItems(): LiveData<List<Item>>
 
     @Query("SELECT * FROM item WHERE id = :itemId")
-    fun get(itemId: Int): Item?
+    fun get(itemId: Int): Maybe<Item>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertItems(vararg items: Item)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(item: Item)
+    fun insert(item: Item): Long
 
     @Query("DELETE FROM item WHERE id = :itemId")
     fun delete(itemId: Int)

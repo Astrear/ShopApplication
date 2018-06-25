@@ -2,14 +2,17 @@ package mx.com.wolf.shop.flow.home
 
 import android.app.Fragment
 import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_home.*
 import mx.com.wolf.shop.R
 import mx.com.wolf.shop.ShopApplication
+import mx.com.wolf.shop.data.source.ItemRepository
 import mx.com.wolf.shop.flow.home.di.DaggerHomeComponent
 import mx.com.wolf.shop.flow.home.di.HomeModule
+import mx.com.wolf.shop.flow.home.fragment.AddFragment
 import mx.com.wolf.shop.flow.home.fragment.ListFragment
 import javax.inject.Inject
 
@@ -24,6 +27,8 @@ class HomeActivity : AppCompatActivity() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    lateinit var itemRepository: ItemRepository
 
     fun inject() {
         DaggerHomeComponent
@@ -41,10 +46,12 @@ class HomeActivity : AppCompatActivity() {
         inject()
         presenter.attachView(this)
 
+        itemRepository = ViewModelProviders.of(this, viewModelFactory)[ItemRepository::class.java]
+
         navigation.setOnNavigationItemSelectedListener({ v ->
             val fragment: Fragment? = when(v.itemId) {
                 R.id.action_list -> ListFragment()
-                R.id.action_add -> null
+                R.id.action_add -> AddFragment()
                 R.id.action_delete -> null
                 R.id.action_settings -> null
                 else -> null

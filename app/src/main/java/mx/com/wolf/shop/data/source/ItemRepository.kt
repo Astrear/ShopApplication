@@ -2,9 +2,9 @@ package mx.com.wolf.shop.data.source
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
 import android.util.Log
+import io.reactivex.rxkotlin.subscribeBy
 import mx.com.wolf.shop.data.Item
 import mx.com.wolf.shop.data.di.Local
 import mx.com.wolf.shop.data.di.Remote
@@ -36,21 +36,22 @@ class ItemRepository
             items = MutableLiveData()
 
         if(cacheIsDirty) {
-            getItemsFromRemoteSOurce()
+            getItemsFromRemoteSource()
         } else {
             localDataSource.getItems()
                     .subscribe { items ->
                         if(items.value != null && items.value!!.isEmpty())
                             this.items!!.value = items.value
-                        else getItemsFromRemoteSOurce()
+                        else getItemsFromRemoteSource()
                     }
         }
         return items!!
     }
 
-    private fun getItemsFromRemoteSOurce() {
+    private fun getItemsFromRemoteSource() {
         remoteDataSource.getItems()
                 .first(mutableListOf())
+                .onErrorReturn { mutableListOf() }
                 .subscribe { items ->
                     for(item in items)
                         localDataSource.addItem(item)
@@ -58,16 +59,35 @@ class ItemRepository
                 }
     }
 
-    fun getItem(itemId: Int, callback: ItemDataSource.GetItemCallback) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun getItem(itemId: Int, callback: UpdateCallback) {
+        remoteDataSource.getItem(itemId).subscribeBy(
+            onSuccess = {callback.onSuccess(it)},
+            onError = {callback.onError(it.message!!)}
+        )
     }
 
-    fun addItem(item: Item) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun addItem(item: Item, callback: UpdateCallback) {
+        remoteDataSource.addItem(item)
+                .onErrorReturn { null }
+                .doOnError { callback.onError(it.message!!) }
+                .firstElement()
+                .subscribe {
+                    callback.onSuccess(it)
+                }
     }
 
-    fun deleteItem(itemId: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun deleteItem(itemId: Int, callback: DeleteCallback) {
+        remoteDataSource.deleteItem(itemId)
+                .subscribe { callback.onSuccess() }
+    }
+
+    interface UpdateCallback {
+        fun onSuccess(item: Item)
+        fun onError(message: String)
+    }
+
+    interface DeleteCallback {
+        fun onSuccess()
     }
 
 }

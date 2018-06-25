@@ -7,6 +7,7 @@
     <color name="clear_white">#99ffffff</color>
     <color name="semitransparent_white">#0dffffff</color>
     <color name="transparent_white">#1affffff</color>
+    <color name="opaque_gray">#3a3d43</color>
     <color name="clear_grey">#888</color>
     <color name="transparent">#00ffffff</color>
     <color name="black">#000</color>

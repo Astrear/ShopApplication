@@ -8,7 +8,6 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import mx.com.wolf.shop.data.Item
 import mx.com.wolf.shop.data.ItemRequest
-import mx.com.wolf.shop.data.source.ItemDataSource
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +17,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class ItemRemoteDataSource
-@Inject constructor(var shopApi: ShopApi): ItemDataSource {
+@Inject constructor(var shopApi: ShopApi) {
 
 
     fun getItems(): Flowable<List<Item>> {
@@ -28,42 +27,25 @@ class ItemRemoteDataSource
                 .toFlowable()
     }
 
-    override fun getItem(itemId: Int, callback: ItemDataSource.GetItemCallback) {
+    fun getItem(itemId: Int) =
         shopApi.getItem(itemId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                        onSuccess = {callback.onSuccess(it)}
-                )
-    }
 
-    override fun addItems(items: List<Item>) {
+    fun addItems(items: List<Item>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun addItem(item: Item)  {
-        Completable.fromAction {
+    fun addItem(item: Item): Flowable<Item>  =
             shopApi.addItem(ItemRequest(item.name, item.image, item.description))
-        }.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                        onComplete = {Log.i("test", "complete")},
-                        onError = {Log.e("test",it.message)}
-                )
-    }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .toFlowable()
 
-    override fun deleteItem(itemId: Int) {
-        Completable.fromAction {
-            shopApi.deleteItem(itemId)
-        }.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(
-                        onComplete = {Log.i("test", "complete")},
-                        onError = {Log.e("test",it.message)}
-                )
-    }
 
-    interface LoadItemsCallback {
-        fun onSuccess(items:List<Item>)
-    }
+    fun deleteItem(itemId: Int) =
+            Completable.fromAction {
+                shopApi.deleteItem(itemId)
+            }.subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())!!
 }
