@@ -3,9 +3,11 @@ package mx.com.wolf.shop.data;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.databinding.BindingAdapter;
+import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.squareup.picasso.Picasso;
 
 import mx.com.wolf.shop.R;
@@ -50,7 +52,12 @@ public class ItemBind extends BaseObservable {
 
     @BindingAdapter("image")
     public static void loadImage(ImageView view, String imageUrl) {
-        Picasso.get().load(imageUrl).error(R.drawable.notfound).into(view);
+        Glide.with(view.getContext())
+                .load(imageUrl)
+                .thumbnail(0.5F)
+                .error(
+                        Glide.with(view.getContext()).load(R.drawable.notfound)
+                ).into(view);
     }
 
 }

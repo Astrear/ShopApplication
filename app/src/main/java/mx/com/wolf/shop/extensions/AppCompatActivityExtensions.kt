@@ -19,3 +19,10 @@ fun AppCompatActivity.requestPermission(permission: String, requestId: Int) =
 
 fun AppCompatActivity.batchRequestPermissions(permissions: Array<String>, requestId: Int) =
         ActivityCompat.requestPermissions(this, permissions, requestId)
+
+fun AppCompatActivity.hasPermissions(permissions: Array<String>): Boolean {
+    for(permission in permissions)
+        if(!isPermissionGranted(permission))
+            return false
+    return true
+}

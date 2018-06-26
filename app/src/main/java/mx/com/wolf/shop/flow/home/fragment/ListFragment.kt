@@ -26,13 +26,14 @@ class ListFragment: Fragment() {
         val TAG = ListFragment::class.simpleName
     }
 
+    lateinit var recyclerView: RecyclerView
+
     private val list = mutableListOf<Item>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view =  inflater.inflate(R.layout.fragment_list, container, false)
-        Log.i(TAG, "On CreateView")
 
-        val recyclerView: RecyclerView = view.findViewById(R.id.item_list)
+        recyclerView = view.findViewById(R.id.item_list)
         recyclerView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(activity.applicationContext)
@@ -40,6 +41,12 @@ class ListFragment: Fragment() {
             adapter = ItemAdapter(list)
         }
 
+        loadItems()
+
+        return view
+    }
+
+    fun loadItems() {
         (activity as HomeActivity).itemRepository
                 .getItems("JWT ${activity.getSessionToken()}")
                 .observe(
@@ -51,6 +58,5 @@ class ListFragment: Fragment() {
                             }
                             recyclerView.adapter.notifyDataSetChanged()
                         })
-        return view
     }
 }

@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.bumptech.glide.Glide
 import com.dd.processbutton.iml.ActionProcessButton
 import com.squareup.picasso.Picasso
 import mx.com.wolf.shop.R
@@ -73,7 +74,10 @@ class DeleteFragment: Fragment() {
 
                                         itemName.text = item.name
                                         itemDescription.text = item.description
-                                        Picasso.get().load(item.image).error(R.drawable.notfound).into(itemImage)
+                                        Glide.with(activity).load(item.image).thumbnail(0.5f)
+                                                .error(
+                                                        Glide.with(activity).load(R.drawable.notfound)
+                                                ).into(itemImage)
                                         itemPreview.visibility = View.VISIBLE
                                     }
 

@@ -1,16 +1,13 @@
 package mx.com.wolf.shop.flow.home
 
-import android.Manifest
 import android.annotation.TargetApi
-import android.app.Activity
 import android.app.Fragment
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_home.*
 import mx.com.wolf.shop.R
@@ -24,11 +21,10 @@ import mx.com.wolf.shop.flow.home.fragment.AddFragment
 import mx.com.wolf.shop.flow.home.fragment.DeleteFragment
 import mx.com.wolf.shop.flow.home.fragment.ListFragment
 import javax.inject.Inject
-import android.graphics.Bitmap
-import android.support.v4.app.NotificationCompat.getExtras
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.widget.ImageView
+import android.support.v4.app.ActivityCompat
+import mx.com.wolf.shop.extensions.batchRequestPermissions
+import mx.com.wolf.shop.extensions.hasPermissions
 
 
 class HomeActivity : AppCompatActivity(), HomeContract.View {
@@ -91,7 +87,6 @@ class HomeActivity : AppCompatActivity(), HomeContract.View {
         })
 
         with(ListFragment()) {
-            Log.i(TAG, "In navigation with")
             this@HomeActivity.fragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, this)
                     .addToBackStack(this.javaClass.name)
@@ -106,11 +101,9 @@ class HomeActivity : AppCompatActivity(), HomeContract.View {
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    fun requestWritePermission(permission: String) {
-        Log.i("Permissions", "CAMERA permission has NOT been granted. Requesting permission.")
-        if(!shouldShowPermissionRationale(permission)) {
-            requestPermission(permission, 1)
-        }
+    fun requestMultPermissions(permissions: Array<String>, requestId: Int) {
+        if(!hasPermissions(permissions))
+            batchRequestPermissions(permissions, requestId)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
