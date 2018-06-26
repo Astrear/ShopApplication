@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.dd.processbutton.iml.ActionProcessButton
 import com.squareup.picasso.Picasso
 import mx.com.wolf.shop.R
 import mx.com.wolf.shop.data.Item
@@ -29,29 +30,37 @@ class DeleteFragment: Fragment() {
 
     val items: MutableMap<String, Int> = mutableMapOf()
     val names: MutableList<String> = mutableListOf()
+    lateinit var spinnerAdapter: ArrayAdapter<String>
+
+    lateinit var spinner: Spinner
+    lateinit var deleteButton: Button
+
     private var currentItemId: Int? = -1
+    private var currentItemName: String = ""
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val layoutView =  inflater.inflate(R.layout.fragment_delete, container, false)
 
-        val spinner = layoutView.findViewById<Spinner>(R.id.delete_spinner)
+        spinner = layoutView.findViewById(R.id.delete_spinner)
 
         (activity as HomeActivity).itemRepository
                 .getItems("JWT ${activity.getSessionToken()}")
                 .observe(activity as HomeActivity, Observer {
                     it?.forEachIndexed { index, item ->
-                        Log.i(TAG, item.name)
                         items[item.name] = item.id
                         names.add(index, item.name)
                     }
-                    spinner.adapter = ArrayAdapter<String>(this@DeleteFragment.activity, R.layout.support_simple_spinner_dropdown_item, names)
+                    spinnerAdapter = ArrayAdapter(this@DeleteFragment.activity, R.layout.support_simple_spinner_dropdown_item, names)
+                    spinner.adapter = spinnerAdapter
                 })
 
         spinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                currentItemId = items[names[position]]
+                currentItemName = names[position]
+                currentItemId = items[currentItemName]
+
                 (activity as HomeActivity).itemRepository
                         .getItem("JWT ${activity.getSessionToken()}",
                                 currentItemId!!,
@@ -64,17 +73,21 @@ class DeleteFragment: Fragment() {
 
                                         itemName.text = item.name
                                         itemDescription.text = item.description
-                                        Picasso.get().load(item.image).into(itemImage)
+                                        Picasso.get().load(item.image).error(R.drawable.notfound).into(itemImage)
                                         itemPreview.visibility = View.VISIBLE
                                     }
 
-                                    override fun onError(message: String) {}
+                                    override fun onError(message: String) {
+                                        (activity as HomeActivity).showMessage(message)
+                                    }
                                 })
             }
         }
 
-        val button = layoutView.findViewById<Button>(R.id.button_delete)
-        button.setOnClickListener {
+        deleteButton = layoutView.findViewById(R.id.button_delete)
+        (deleteButton as ActionProcessButton).setMode(ActionProcessButton.Mode.ENDLESS)
+        deleteButton.setOnClickListener {
+            (it as ActionProcessButton).progress = 1
             it.isEnabled = false
             AlertDialog(activity).apply {
                 setupDialog(
@@ -85,18 +98,29 @@ class DeleteFragment: Fragment() {
                         DialogButton.POSITIVE,
                         getString(R.string.dialog_okbutton),
                         {
-                            (activity as HomeActivity).itemRepository
-                                    .deleteItem("JWT ${activity.getSessionToken()}", currentItemId!!, object: ItemRepository.DeleteCallback {
-                                        override fun onSuccess() {
-                                            Log.i(TAG, "Item deleted")
-                                        }
-                                    })
+                            with(activity as HomeActivity) {
+                                itemRepository.deleteItem(
+                                        "JWT ${activity.getSessionToken()}",
+                                        currentItemId!!,
+                                        object: ItemRepository.DeleteCallback {
+                                            override fun onSuccess() {
+                                                names.remove(currentItemName)
+                                                items.remove(currentItemName)
+                                                spinnerAdapter.remove(currentItemName)
+                                                spinner.adapter = spinnerAdapter
+                                                it.progress = 100
+                                                it.isEnabled = true
+                                                showMessage("Item deleted")
+                                            }
+                                        })
+                            }
                         }))
 
                 addButton(DialogButton(
                         DialogButton.NEGATIVE,
                         getString(R.string.dialog_cancelbutton),
                         {
+                            it.progress = 0
                             it.isEnabled = true
                             Log.i(TAG, "Operation canceled")
                         }

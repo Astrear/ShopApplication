@@ -53,9 +53,11 @@
         </android.support.design.widget.TextInputLayout>
 
         <ImageButton
+            android:id="@+id/button_camera"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center_vertical"
+            android:contentDescription="@string/camera"
             android:background="@drawable/camera"/>
     </LinearLayout>
 

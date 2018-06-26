@@ -17,4 +17,5 @@
     <string name="dialog_cancelbutton">Cancel</string>
     <string name="delete_item_title">Delete Item</string>
     <string name="delete_item_msg">continue to delete the current item?</string>
+    <string name="camera">Photo</string>
 </resources>

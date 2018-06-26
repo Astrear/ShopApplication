@@ -1,21 +1,35 @@
 package mx.com.wolf.shop.flow.home
 
+import android.Manifest
+import android.annotation.TargetApi
+import android.app.Activity
 import android.app.Fragment
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
+import android.os.Build
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_home.*
 import mx.com.wolf.shop.R
 import mx.com.wolf.shop.ShopApplication
 import mx.com.wolf.shop.data.source.ItemRepository
+import mx.com.wolf.shop.extensions.requestPermission
+import mx.com.wolf.shop.extensions.shouldShowPermissionRationale
 import mx.com.wolf.shop.flow.home.di.DaggerHomeComponent
 import mx.com.wolf.shop.flow.home.di.HomeModule
 import mx.com.wolf.shop.flow.home.fragment.AddFragment
 import mx.com.wolf.shop.flow.home.fragment.DeleteFragment
 import mx.com.wolf.shop.flow.home.fragment.ListFragment
 import javax.inject.Inject
+import android.graphics.Bitmap
+import android.support.v4.app.NotificationCompat.getExtras
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.widget.ImageView
+
 
 class HomeActivity : AppCompatActivity(), HomeContract.View {
 
@@ -38,6 +52,10 @@ class HomeActivity : AppCompatActivity(), HomeContract.View {
                 .homeModule(HomeModule())
                 .build()
                 .inject(this)
+    }
+
+    fun showMessage(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,4 +104,17 @@ class HomeActivity : AppCompatActivity(), HomeContract.View {
             super.onBackPressed()
         }
     }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    fun requestWritePermission(permission: String) {
+        Log.i("Permissions", "CAMERA permission has NOT been granted. Requesting permission.")
+        if(!shouldShowPermissionRationale(permission)) {
+            requestPermission(permission, 1)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
 }
