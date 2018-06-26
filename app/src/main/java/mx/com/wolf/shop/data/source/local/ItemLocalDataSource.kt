@@ -26,11 +26,10 @@ class ItemLocalDataSource
 ) {
 
 
-    fun getItems(): Single<LiveData<List<Item>>> {
-        return Single.fromCallable({ itemDAO.getItems() })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-    }
+    fun getItems(): Flowable<LiveData<List<Item>>> =
+            Flowable.fromCallable {itemDAO.getItems()}
+                   .subscribeOn(Schedulers.io())
+                   .observeOn(AndroidSchedulers.mainThread())
 
     fun getItem(itemId: Int): Flowable<Item> =
             itemDAO.get(itemId)
@@ -38,12 +37,16 @@ class ItemLocalDataSource
                     .observeOn(AndroidSchedulers.mainThread())
                     .toFlowable()
 
-    fun addItem(item: Item): Flowable<Long> =
-            Completable.fromAction {
-                itemDAO.insert(item)
-            }.subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .toFlowable()
+    /*fun addItem(item: Item): Flowable<Long> =
+            Flowable.fromCallable {itemDAO.insert(item)}
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())*/
+    fun addItem(item: Item) {
+        Runnable {
+            itemDAO.insert(item)
+        }.let {executors.diskIO.execute(it)}
+    }
+
 
     fun deleteItem(itemId: Int) {
         Runnable {

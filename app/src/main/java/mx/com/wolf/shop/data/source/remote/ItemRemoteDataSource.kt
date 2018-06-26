@@ -1,10 +1,8 @@
 package mx.com.wolf.shop.data.source.remote
 
-import android.util.Log
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import mx.com.wolf.shop.data.Item
 import mx.com.wolf.shop.data.ItemRequest
@@ -19,33 +17,26 @@ import javax.inject.Singleton
 class ItemRemoteDataSource
 @Inject constructor(var shopApi: ShopApi) {
 
-
-    fun getItems(): Flowable<List<Item>> {
-        return shopApi.getItems()
+    fun getItems(token: String): Flowable<List<Item>> {
+        return shopApi.getItems(token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .toFlowable()
     }
 
-    fun getItem(itemId: Int) =
-        shopApi.getItem(itemId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+    fun getItem(token: String, itemId: Int) =
+            shopApi.getItem(token, itemId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())!!
 
-    fun addItems(items: List<Item>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    fun addItem(item: Item): Flowable<Item>  =
-            shopApi.addItem(ItemRequest(item.name, item.image, item.description))
+    fun addItem(token: String, item: Item): Flowable<Item>  =
+            shopApi.addItem(token, ItemRequest(item.name, item.image, item.description))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .toFlowable()
 
-
-    fun deleteItem(itemId: Int) =
-            Completable.fromAction {
-                shopApi.deleteItem(itemId)
-            }.subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())!!
+    fun deleteItem(token: String, itemId: Int): Completable =
+            shopApi.deleteItem(token, itemId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
 }

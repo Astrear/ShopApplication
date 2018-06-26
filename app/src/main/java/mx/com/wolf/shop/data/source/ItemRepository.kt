@@ -24,61 +24,80 @@ class ItemRepository
         @Remote var remoteDataSource: ItemRemoteDataSource
 ): ViewModel() {
 
-    var items: MutableLiveData<List<Item>>? = null
-    var cacheIsDirty: Boolean = true
+    companion object {
+        val TAG = ItemRepository::class.simpleName
+    }
 
-    fun getItems(): LiveData<List<Item>> {
-        Log.i("Repository", "on getfunction")
+    private var items: MutableLiveData<List<Item>>? = null
+    private var cacheIsDirty: Boolean = false
+
+    fun getItems(token: String): LiveData<List<Item>> {
         if(items != null && !cacheIsDirty)
             return items!!
-
-        if(items == null)
             items = MutableLiveData()
 
+
         if(cacheIsDirty) {
-            getItemsFromRemoteSource()
+            getItemsFromRemoteSource(token)
         } else {
+            Log.i(TAG, "Getting items from local source")
             localDataSource.getItems()
+                    .firstElement()
+                    .doOnError { Log.i(TAG, it.message) }
                     .subscribe { items ->
-                        if(items.value != null && items.value!!.isEmpty())
+                        Log.i(TAG, "in subscribe")
+                        if(items.value != null && items.value!!.isNotEmpty()) {
                             this.items!!.value = items.value
-                        else getItemsFromRemoteSource()
+                        } else getItemsFromRemoteSource(token)
+
                     }
         }
         return items!!
     }
 
-    private fun getItemsFromRemoteSource() {
-        remoteDataSource.getItems()
+    private fun getItemsFromRemoteSource(token: String) {
+        Log.i(TAG, "Getting items from remote source")
+        remoteDataSource.getItems(token)
                 .first(mutableListOf())
                 .onErrorReturn { mutableListOf() }
                 .subscribe { items ->
                     for(item in items)
                         localDataSource.addItem(item)
                     this.items!!.value = items
+                    cacheIsDirty = false
                 }
     }
 
-    fun getItem(itemId: Int, callback: UpdateCallback) {
-        remoteDataSource.getItem(itemId).subscribeBy(
+    fun getItem(token: String, itemId: Int, callback: UpdateCallback) {
+        remoteDataSource.getItem(token, itemId).subscribeBy(
             onSuccess = {callback.onSuccess(it)},
             onError = {callback.onError(it.message!!)}
         )
     }
 
-    fun addItem(item: Item, callback: UpdateCallback) {
-        remoteDataSource.addItem(item)
+    fun addItem(token: String, item: Item, callback: UpdateCallback) {
+        remoteDataSource.addItem(token, item)
                 .onErrorReturn { null }
                 .doOnError { callback.onError(it.message!!) }
                 .firstElement()
                 .subscribe {
+                    cacheIsDirty = true
                     callback.onSuccess(it)
                 }
     }
 
-    fun deleteItem(itemId: Int, callback: DeleteCallback) {
-        remoteDataSource.deleteItem(itemId)
-                .subscribe { callback.onSuccess() }
+    fun deleteItem(token: String, itemId: Int, callback: DeleteCallback) {
+        remoteDataSource.deleteItem(token, itemId)
+                .doOnError { Log.i(TAG, it.message) }
+                .subscribe {
+                    cacheIsDirty = true
+                    refreshCachedItems(token)
+                    callback.onSuccess()
+                }
+    }
+
+    private fun refreshCachedItems(token: String) {
+        this.items!!.value = getItems(token).value
     }
 
     interface UpdateCallback {

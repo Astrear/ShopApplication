@@ -11,4 +11,10 @@
     <string name="item_description">Item Description</string>
     <string name="item_image_url">Item Image URL</string>
     <string name="text_add_item">Add Item</string>
+    <string name="item_name">Item Name</string>
+    <string name="delete_item">Delete Item</string>
+    <string name="dialog_okbutton">OK</string>
+    <string name="dialog_cancelbutton">Cancel</string>
+    <string name="delete_item_title">Delete Item</string>
+    <string name="delete_item_msg">continue to delete the current item?</string>
 </resources>

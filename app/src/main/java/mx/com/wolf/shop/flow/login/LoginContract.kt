@@ -13,6 +13,7 @@ object LoginContract {
     }
 
     abstract class Presenter: BasePresenter<View>() {
+        abstract fun login()
         abstract fun login(username: String, password: String)
     }
 }

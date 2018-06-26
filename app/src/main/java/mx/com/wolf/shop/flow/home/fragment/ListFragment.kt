@@ -2,7 +2,6 @@ package mx.com.wolf.shop.flow.home.fragment
 
 import android.app.Fragment
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
@@ -14,8 +13,7 @@ import android.view.ViewGroup
 import mx.com.wolf.shop.R
 import mx.com.wolf.shop.data.Item
 import mx.com.wolf.shop.data.ItemAdapter
-import mx.com.wolf.shop.data.source.ItemRepository
-import mx.com.wolf.shop.data.source.local.ItemViewModel
+import mx.com.wolf.shop.extensions.getSessionToken
 import mx.com.wolf.shop.flow.home.HomeActivity
 
 /**
@@ -30,11 +28,6 @@ class ListFragment: Fragment() {
 
     private val list = mutableListOf<Item>()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.i("Test", "on listfragment")
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view =  inflater.inflate(R.layout.fragment_list, container, false)
         Log.i(TAG, "On CreateView")
@@ -47,14 +40,17 @@ class ListFragment: Fragment() {
             adapter = ItemAdapter(list)
         }
 
-        (activity as HomeActivity).itemRepository.getItems().observe(activity as HomeActivity, Observer {
-
-            if(it != null) {
-                list.clear()
-                list.addAll(it)
-            }
-            recyclerView.adapter.notifyDataSetChanged()
-        })
+        (activity as HomeActivity).itemRepository
+                .getItems("JWT ${activity.getSessionToken()}")
+                .observe(
+                        activity as HomeActivity,
+                        Observer {
+                            if(it != null) {
+                                list.clear()
+                                list.addAll(it)
+                            }
+                            recyclerView.adapter.notifyDataSetChanged()
+                        })
         return view
     }
 }

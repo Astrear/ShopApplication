@@ -1,14 +1,14 @@
 package mx.com.wolf.shop.data;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.databinding.BindingAdapter;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.squareup.picasso.Picasso;
+
+import mx.com.wolf.shop.R;
 
 /**
  * Created by Jose Barrera on 25/06/18.
@@ -50,9 +50,7 @@ public class ItemBind extends BaseObservable {
 
     @BindingAdapter("image")
     public static void loadImage(ImageView view, String imageUrl) {
-        Glide.with(view.getContext())
-                .load(imageUrl)
-                .into(view);
+        Picasso.get().load(imageUrl).error(R.drawable.notfound).into(view);
     }
 
 }

@@ -14,5 +14,5 @@ import mx.com.wolf.shop.mvp.di.ActivityScope
 class HomeModule {
     @Provides
     @ActivityScope
-    fun provideHomePresenter(itemRepository: ItemRepository): HomePresenter = HomePresenter(itemRepository)
+    fun provideHomePresenter(): HomePresenter = HomePresenter()
 }

@@ -15,6 +15,7 @@ import com.squareup.picasso.Picasso
 import mx.com.wolf.shop.R
 import mx.com.wolf.shop.data.Item
 import mx.com.wolf.shop.data.source.ItemRepository
+import mx.com.wolf.shop.extensions.getSessionToken
 import mx.com.wolf.shop.flow.home.HomeActivity
 
 /**
@@ -25,11 +26,6 @@ class AddFragment: Fragment() {
 
     companion object {
         val TAG = AddFragment::class.simpleName
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.i("Test", "on addfragment")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -49,27 +45,22 @@ class AddFragment: Fragment() {
 
 
         button.setOnClickListener {
-            val itemName = view.findViewById<TextInputLayout>(R.id.input_item_name)
-            val itemDescription = view.findViewById<EditText>(R.id.input_item_description)
+            val itemName = view.findViewById<TextInputLayout>(R.id.input_item_name).editText!!.text.toString()
+            val itemDescription = view.findViewById<EditText>(R.id.input_item_description).text.toString()
 
-            if(itemName.editText!!.text.toString().isNotBlank() &&
-                    imageSRC.editText!!.text.toString().isNotBlank() &&
-                    itemDescription.text.toString().isNotBlank())
+            if(itemName.isNotBlank() && imageSRC.editText!!.text.toString().isNotBlank() && itemDescription.isNotBlank())
                 (activity as HomeActivity).itemRepository.addItem(
-                        Item(
-                                itemName.editText!!.text.toString(),
-                                imageSRC.editText!!.text.toString(),
-                                itemDescription.text.toString()
-                        ), object: ItemRepository.UpdateCallback {
-                    override fun onSuccess(item: Item) {
-                        Log.i(TAG, "Item saved successfully with id: ${item.id}")
-                    }
+                        "JWT ${activity.getSessionToken()}",
+                        Item(itemName, imageSRC.editText!!.text.toString(), itemDescription),
+                        object: ItemRepository.UpdateCallback {
+                            override fun onSuccess(item: Item) {
+                                Log.i(TAG, "Item saved successfully with id: ${item.id}")
+                            }
 
-                    override fun onError(message: String) {
-                        Log.i(TAG, message)
-                    }
-
-                })
+                            override fun onError(message: String) {
+                                Log.i(TAG, message)
+                            }
+                        })
         }
 
         return view

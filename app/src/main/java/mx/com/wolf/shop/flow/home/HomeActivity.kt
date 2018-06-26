@@ -13,10 +13,11 @@ import mx.com.wolf.shop.data.source.ItemRepository
 import mx.com.wolf.shop.flow.home.di.DaggerHomeComponent
 import mx.com.wolf.shop.flow.home.di.HomeModule
 import mx.com.wolf.shop.flow.home.fragment.AddFragment
+import mx.com.wolf.shop.flow.home.fragment.DeleteFragment
 import mx.com.wolf.shop.flow.home.fragment.ListFragment
 import javax.inject.Inject
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : AppCompatActivity(), HomeContract.View {
 
     companion object {
         val TAG = HomeActivity::class.simpleName
@@ -52,7 +53,7 @@ class HomeActivity : AppCompatActivity() {
             val fragment: Fragment? = when(v.itemId) {
                 R.id.action_list -> ListFragment()
                 R.id.action_add -> AddFragment()
-                R.id.action_delete -> null
+                R.id.action_delete -> DeleteFragment()
                 R.id.action_settings -> null
                 else -> null
             }

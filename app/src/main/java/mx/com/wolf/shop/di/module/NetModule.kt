@@ -1,6 +1,7 @@
 package mx.com.wolf.shop.di.module
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -53,26 +54,11 @@ class NetModule(private val baseURL: String) {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor, sessionToken: String): OkHttpClient {
+    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
-                .addInterceptor({ chain ->
-                    val request = chain.request()
-                    if(request.url().encodedPath().toLowerCase() == "/api-token-auth/")
-                        return@addInterceptor chain.proceed(request)
-
-                    return@addInterceptor chain.proceed(
-                            request.newBuilder()
-                                    .addHeader("Authorization", "JWT $sessionToken")
-                                    .build()
-                    )
-                })
                 .build()
     }
-
-    @Provides
-    @Singleton
-    fun provideSessionToken(context: Context): String = context.getSessionToken()
 
     @Provides
     @Singleton

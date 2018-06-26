@@ -8,15 +8,7 @@ import mx.com.wolf.shop.mvp.BaseView
  * Copyright (c) 2018 Anzen Digital All rights reserved.
  */
 object HomeContract {
-    interface View: BaseView {
-        fun showItemList()
-        fun showNewItem(name: String, image: String, desc: String)
-        fun hideItem(itemId: String)
-    }
+    interface View: BaseView
 
-    abstract class Presenter: BasePresenter<View>() {
-        abstract fun getItemList()
-        abstract fun addItem(name: String, image: String, desc: String)
-        abstract fun deleteItem(itemId: String)
-    }
+    abstract class Presenter: BasePresenter<View>()
 }

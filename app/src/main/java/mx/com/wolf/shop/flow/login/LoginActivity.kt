@@ -19,7 +19,8 @@ class LoginActivity : AppCompatActivity(), LoginContract.View {
         val TAG = LoginActivity::class.simpleName
     }
 
-    @Inject lateinit var  presenter: LoginPresenter
+    @Inject
+    lateinit var  presenter: LoginPresenter
 
     lateinit var loginButton: ActionProcessButton
 
@@ -47,6 +48,8 @@ class LoginActivity : AppCompatActivity(), LoginContract.View {
 
         inject()
         presenter.attachView(this)
+
+        presenter.login()
 
         loginButton = button_login.apply { setMode(ActionProcessButton.Mode.ENDLESS) }
         loginButton.setOnClickListener {

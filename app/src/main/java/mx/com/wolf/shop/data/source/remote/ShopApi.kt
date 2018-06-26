@@ -19,17 +19,34 @@ interface ShopApi {
     @POST("/api-token-auth/")
     fun getJwtToken(@Body login: Login): Maybe<Response<JwtToken>>
 
-    @GET("/items/")
-    fun getItems(): Maybe<List<Item>>
+    @Headers("Content-Type: application/json")
+    @POST("/api-token-refresh/")
+    fun refreshJwtToken(@Body token: JwtToken): Maybe<Response<JwtToken>>
 
-    @GET("/items/{itemId}/")
-    fun getItem(@Path("itemId") itemId: Int): Maybe<Item>
+    @Headers("Content-Type: application/json")
+    @POST("/api-token-verify/")
+    fun verifyJwtToken(@Body token: JwtToken): Maybe<Response<JwtToken>>
+
+    @GET("/items/")
+    fun getItems(@Header("Authorization") token: String): Maybe<List<Item>>
+
+    @GET("/items/{id}/")
+    fun getItem(
+            @Header("Authorization") token: String,
+            @Path("id") itemId: Int
+    ): Maybe<Item>
 
     @Headers("Content-Type: application/json")
     @POST("/items/")
-    fun addItem(@Body itemRequest: ItemRequest): Maybe<Item>
+    fun addItem(
+            @Header("Authorization") token: String,
+            @Body itemRequest: ItemRequest
+    ): Maybe<Item>
 
-    @DELETE("/items/{itemId}/")
-    fun deleteItem(@Path("itemId") itemId: Int): Completable
+    @DELETE("/items/{id}/")
+    fun deleteItem(
+            @Header("Authorization") token: String,
+            @Path("id") itemId: Int
+    ): Completable
 
 }

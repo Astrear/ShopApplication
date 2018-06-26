@@ -1,7 +1,7 @@
 package mx.com.wolf.shop.flow.login
 
 import android.util.Log
-import mx.com.wolf.shop.data.JwtToken
+import io.reactivex.rxkotlin.subscribeBy
 import mx.com.wolf.shop.data.source.LoginApi
 import mx.com.wolf.shop.extensions.getSessionToken
 import mx.com.wolf.shop.extensions.setSessionToken
@@ -15,30 +15,49 @@ class LoginPresenter @Inject constructor(
         var loginApi: LoginApi
 ): LoginContract.Presenter()  {
 
-    override fun login(username: String, password: String) {
-        loginApi.getJwtToken(username, password, object: LoginApi.GetJwtTokenCallback {
-
-            override fun onSuccess(jwtToken: JwtToken) {
-                Log.i(LoginActivity.TAG, "Success getting session token: ${jwtToken.token}")
-
-                with(getView() as LoginActivity) {
-                    loginButton.progress = 100
-                    if(getSessionToken() != jwtToken.token) {
-                        setSessionToken(jwtToken.token)
-                        showHome()
+    override fun login() {
+        val sessionToken = (getView() as LoginActivity).getSessionToken()
+        if(sessionToken.isNotBlank())
+            loginApi.verifyJwtToken(sessionToken)
+                .subscribe {
+                    if (it.isSuccessful) {
+                        Log.i(LoginActivity.TAG, "Current token is valid: ${it.body()!!.token}")
+                        (getView() as LoginActivity).showHome()
                     }
-                    else showHome()
                 }
-            }
+        else Log.i(LoginActivity.TAG, "Missing or expired token")
+    }
 
-            override fun onError(error: String) {
-                with(getView() as LoginActivity) {
-                    loginButton.progress = -1
-                    loginButton.isEnabled = true
-                    showError(error)
-                }
-            }
-
-        })
+    override fun login(username: String, password: String) {
+        loginApi.getJwtToken(username, password)
+                .subscribeBy(
+                        onSuccess = {response ->
+                            with(getView() as LoginActivity) {
+                                if (response.isSuccessful) {
+                                    Log.i(LoginActivity.TAG, "New session token: ${response.body()!!.token}")
+                                    setSessionToken(response.body()!!.token)
+                                    showHome()
+                                } else when (response.code()) {
+                                    400 -> {
+                                        loginButton.progress = -1
+                                        loginButton.isEnabled = true
+                                        showError("Incorrect Username/Password")
+                                    }
+                                    else -> {
+                                        loginButton.progress = -1
+                                        loginButton.isEnabled = true
+                                        showError("Server error code: ${response.code()}")
+                                    }
+                                }
+                            }
+                        },
+                        onError = {
+                            with(getView() as LoginActivity) {
+                                loginButton.progress = -1
+                                loginButton.isEnabled = true
+                                showError(it.message!!)
+                            }
+                        }
+                )
     }
 }
