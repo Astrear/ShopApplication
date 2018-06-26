@@ -13,18 +13,16 @@ import kotlinx.android.synthetic.main.activity_home.*
 import mx.com.wolf.shop.R
 import mx.com.wolf.shop.ShopApplication
 import mx.com.wolf.shop.data.source.ItemRepository
-import mx.com.wolf.shop.extensions.requestPermission
-import mx.com.wolf.shop.extensions.shouldShowPermissionRationale
+import mx.com.wolf.shop.extensions.batchRequestPermissions
+import mx.com.wolf.shop.extensions.hasPermissions
 import mx.com.wolf.shop.flow.home.di.DaggerHomeComponent
 import mx.com.wolf.shop.flow.home.di.HomeModule
 import mx.com.wolf.shop.flow.home.fragment.AddFragment
 import mx.com.wolf.shop.flow.home.fragment.DeleteFragment
 import mx.com.wolf.shop.flow.home.fragment.ListFragment
+import mx.com.wolf.shop.flow.home.fragment.SettingsFragment
+import mx.com.wolf.shop.flow.login.LoginActivity
 import javax.inject.Inject
-import android.content.pm.PackageManager
-import android.support.v4.app.ActivityCompat
-import mx.com.wolf.shop.extensions.batchRequestPermissions
-import mx.com.wolf.shop.extensions.hasPermissions
 
 
 class HomeActivity : AppCompatActivity(), HomeContract.View {
@@ -68,7 +66,7 @@ class HomeActivity : AppCompatActivity(), HomeContract.View {
                 R.id.action_list -> ListFragment()
                 R.id.action_add -> AddFragment()
                 R.id.action_delete -> DeleteFragment()
-                R.id.action_settings -> null
+                R.id.action_settings -> SettingsFragment()
                 else -> null
             }
 
@@ -108,6 +106,12 @@ class HomeActivity : AppCompatActivity(), HomeContract.View {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    fun showLogin() {
+        val intent = Intent(applicationContext, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
     }
 
 }

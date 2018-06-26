@@ -3,11 +3,13 @@ package mx.com.wolf.shop.flow.login
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import android.widget.Toast
 import com.dd.processbutton.iml.ActionProcessButton
 import kotlinx.android.synthetic.main.activity_login.*
 import mx.com.wolf.shop.R
 import mx.com.wolf.shop.ShopApplication
+import mx.com.wolf.shop.extensions.start
 import mx.com.wolf.shop.flow.home.HomeActivity
 import mx.com.wolf.shop.flow.login.di.DaggerLoginComponent
 import mx.com.wolf.shop.flow.login.di.LoginModule
@@ -48,20 +50,21 @@ class LoginActivity : AppCompatActivity(), LoginContract.View {
 
         inject()
         presenter.attachView(this)
-
         presenter.login()
 
-        loginButton = button_login.apply { setMode(ActionProcessButton.Mode.ENDLESS) }
-        loginButton.setOnClickListener {
+        loginButton = button_login.apply {
+            setMode(ActionProcessButton.Mode.ENDLESS)
+            setOnClickListener(loginButtonListener)
+        }
+    }
 
-            val userName = input_username.editText!!.text.toString()
-            val password = input_password.editText!!.text.toString()
+    private val loginButtonListener = View.OnClickListener {
+        val userName = input_username.editText!!.text.toString()
+        val password = input_password.editText!!.text.toString()
 
-            if(password.isNotBlank() && userName.isNotBlank()) {
-                presenter.login(userName, password)
-                loginButton.isEnabled = false
-                loginButton.progress = 1
-            }
+        if (password.isNotBlank() && userName.isNotBlank()) {
+            loginButton.start()
+            presenter.login(userName, password)
         }
     }
 }

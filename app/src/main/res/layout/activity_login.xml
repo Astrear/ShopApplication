@@ -12,8 +12,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@id/input_password"
-        app:layout_constraintLeft_toRightOf="@id/vertical_left"
-        app:layout_constraintRight_toLeftOf="@id/vertical_right">
+        app:layout_constraintLeft_toRightOf="@id/horizontal_left"
+        app:layout_constraintRight_toLeftOf="@id/horizontal_right">
         <android.support.design.widget.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -25,9 +25,9 @@
         android:id="@+id/input_password"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/horizontal_center"
-        app:layout_constraintLeft_toRightOf="@id/vertical_left"
-        app:layout_constraintRight_toLeftOf="@id/vertical_right">
+        app:layout_constraintBottom_toTopOf="@id/vertical_center"
+        app:layout_constraintLeft_toRightOf="@id/horizontal_left"
+        app:layout_constraintRight_toLeftOf="@id/horizontal_right">
         <android.support.design.widget.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,28 +52,28 @@
         custom:pb_textError="Error"
         custom:pb_colorError="@color/red_error"
         android:layout_marginTop="10dp"
-        app:layout_constraintTop_toBottomOf="@id/horizontal_center"
-        app:layout_constraintLeft_toRightOf="@id/vertical_left"
-        app:layout_constraintRight_toLeftOf="@id/vertical_right"/>
+        app:layout_constraintTop_toBottomOf="@id/vertical_center"
+        app:layout_constraintLeft_toRightOf="@id/horizontal_left"
+        app:layout_constraintRight_toLeftOf="@id/horizontal_right"/>
 
     <android.support.constraint.Guideline
-        android:id="@+id/horizontal_center"
+        android:id="@+id/vertical_center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.5"/>
 
     <android.support.constraint.Guideline
-        android:id="@+id/vertical_left"
+        android:id="@+id/horizontal_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.2"/>
 
     <android.support.constraint.Guideline
-        android:id="@+id/vertical_right"
+        android:id="@+id/horizontal_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.8"/>
+        app:layout_constraintGuide_percent="0.8" />
 </android.support.constraint.ConstraintLayout>
